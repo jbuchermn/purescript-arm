@@ -25,25 +25,20 @@
         haskell.compiler.ghc923
         stack
       ];
-# # /dev/null due to https://github.com/commercialhaskell/stack/issues/5607
-    in
-    {
 
-      packages.purescript-arm = pkgs.stdenv.mkDerivation {
-        name = "purescript";
+      stackPackage = { name, owner, repo, rev, sha256 }: pkgs.stdenv.mkDerivation {
         inherit buildInputs;
+        inherit name;
 
         src = pkgs.fetchFromGitHub {
-          owner = "purescript";
-          repo = "purescript" ;
-          rev = "9870ec72cf74708e1b1cfaf01c23e05168f0d691";
-          sha256 = "sha256-dQBSNghRMGj0DK+08SgCQESBWkPPUPrzuBVNk964X4Y=";
+          inherit owner repo rev sha256;
         };
 
         preConfigure = ''
           export STACK_ROOT=$NIX_BUILD_TOP/.stack
         '';
 
+        # /dev/null due to https://github.com/commercialhaskell/stack/issues/5607
         buildPhase = ''
           runHook preBuild
           stack --system-ghc build > /dev/null
@@ -62,29 +57,29 @@
           runHook postInstall
         '';
       };
+    in
+    {
 
-#       spago-arm = {
-#         name = "spago";
-#         inherit buildInputs;
-#
-#         src = pkgs.fetchFromGitHub {
-#           owner = "purescript";
-#           repo = "spago" ;
-#           rev = "d16d4914200783fbd820ba89dbdf67270454faf5";
-#           # sha256 = "sha256-dQBSNghRMGj0DK+08SgCQESBWkPPUPrzuBVNk964X4Y=";
-#         };
-#
-#         builder = ''
-# #!/usr/bin/env bash
-# stack build > /dev/null
-#         '';
-#       };
+      packages.purescript-arm = stackPackage {
+          name = "purescript";
+          owner = "purescript";
+          repo = "purescript";
+          rev = "9870ec72cf74708e1b1cfaf01c23e05168f0d691";
+          sha256 = "sha256-dQBSNghRMGj0DK+08SgCQESBWkPPUPrzuBVNk964X4Y=";
+      };
 
-
-      # devShell = pkgs.mkShell {
-      #   name = "purescript";
-      #   inherit buildInputs;
+      # packages.spago-arm = stackPackage {
+      #   name = "spago";
+      #   owner = "purescript";
+      #   repo = "spago";
+      #   rev = "d16d4914200783fbd820ba89dbdf67270454faf5";
+      #   sha256 = "sha256-dQBSNghRMGj0DK+08SgCQESBWkPPUPrzuBVNk964X4Y=";
       # };
+
+      devShell = pkgs.mkShell {
+        name = "purescript-dev";
+        inherit buildInputs;
+      };
     }
   );
 }
